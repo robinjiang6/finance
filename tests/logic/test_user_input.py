@@ -89,6 +89,25 @@ class TestUserInput(unittest.TestCase):
         self.assertEqual(1699, outside_func(standard_inputs=["1699", "1700", "2025", "1701"])[1])
         self.assertEqual(1701, outside_func(standard_inputs=["abdfb", "@#$dg", "202df5", "1701"])[1])
 
+    def test_stock_search(self):
+        s = StockSearch("AAPL", 1995, 100)
+        self.assertEqual("AAPL", s.symbol)
+        self.assertEqual(1995, s.year)
+        self.assertEqual(100, s.dollars)
+        a = StockSearch("AAPL", 1995, 100)
+        self.assertEqual(s, a)
+        self.assertIsNot(s, a)
+
+    def test_get_user_input(self):
+        s = StockSearch("AAPL", 1995, 100)
+
+        @run_with_io
+        def outside_func():
+            return UserInput().get_user_input()
+
+        self.assertEqual(s, outside_func(standard_inputs=["AAPL", "1995", "100"])[1])
+        self.assertEqual(s, outside_func(standard_inputs=["AAAAAA", "AAPL", "1700", "1995", "asdfsd", "100"])[1])
+
 
 if __name__ == "__main__":
     unittest.main()
