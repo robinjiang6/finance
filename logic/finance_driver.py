@@ -6,4 +6,40 @@
 # for stock prices for a given StockSearch (from user_input)
 
 import yfinance
+import datetime
+from user_input import StockSearch
 
+
+class TickerError(Exception):
+    """Raised when a ticker symbol is invalid"""
+    pass
+
+
+def get_change_in_capital(search: StockSearch) -> float:
+    """Uses the information in search to calculate change in capital based on yfinance."""
+    ticker = yfinance.Ticker(search.symbol)
+    if ticker.info is None:
+        raise TickerError(f'"{search.symbol}" is not a valid symbol.')
+
+    month, day = _format_month_and_day()
+
+    # search for one year from search.year to search.year + 1
+    history = ticker.history(start=f"{search.year}-{month}-{day}",
+                             end=f"{search.year + 1}-{month}-{day}")
+    return calculate_change(history.iloc[0]["Open"], ticker.info['currentPrice'], search.dollars)
+
+
+def calculate_change(starting_price: int | float, ending_price: int | float, amount_invested: int | float) -> float:
+    """Returns the amount of money resulting after investing at starting_price."""
+    return amount_invested * (ending_price/starting_price)
+
+
+def _format_month_and_day() -> tuple[str | int, str | int]:
+    """returns a tuple of month, day in (DD, YY) form"""
+    month = datetime.date.today().month
+    day = datetime.date.today().day
+    if month < 10:
+        month = '0' + str(month)
+    if day < 10:
+        day = '0' + str(day)
+    return month, day
