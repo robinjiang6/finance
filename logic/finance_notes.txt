@@ -1,0 +1,19 @@
+some notes on how to use yfinance:
+
+
+msft = yfinance.Ticker("MSFT")
+
+# get info as dict
+s = msft.info
+
+# get current price of stock
+s['currentPrice']
+
+# get history price of stock
+https://github.com/ranaroussi/yfinance/wiki/Ticker
+hist = msft.history(start = "yyyy-mm-dd", end = 'yyyy-mm-dd')
+
+# get row at index i = 0
+hist.iloc[[0]] # for a panda DataFrame row
+hist.iloc[0] # for a "dict" of the row
+hist.iloc[0]["Open"] # for the open price
