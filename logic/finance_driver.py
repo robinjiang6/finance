@@ -7,7 +7,7 @@
 
 import yfinance
 import datetime
-from user_input import StockSearch
+from logic.user_input import StockSearch
 
 
 class TickerError(Exception):
@@ -26,12 +26,18 @@ def get_change_in_capital(search: StockSearch) -> float:
     # search for one year from search.year to search.year + 1
     history = ticker.history(start=f"{search.year}-{month}-{day}",
                              end=f"{search.year + 1}-{month}-{day}")
-    return calculate_change(history.iloc[0]["Open"], ticker.info['currentPrice'], search.dollars)
+    info = ticker.info
+    if 'currentPrice' not in info:
+        current_price = info['previousClose']
+    else:
+        current_price = info['currentPrice']
+
+    return calculate_change(history.iloc[0]["Open"], current_price, search.dollars)
 
 
 def calculate_change(starting_price: int | float, ending_price: int | float, amount_invested: int | float) -> float:
     """Returns the amount of money resulting after investing at starting_price."""
-    return amount_invested * (ending_price/starting_price)
+    return round(amount_invested * (ending_price/starting_price), 2)
 
 
 def _format_month_and_day() -> tuple[str | int, str | int]:
@@ -43,3 +49,6 @@ def _format_month_and_day() -> tuple[str | int, str | int]:
     if day < 10:
         day = '0' + str(day)
     return month, day
+
+
+__all__ = [TickerError.__name__, get_change_in_capital.__name__, calculate_change.__name__]
