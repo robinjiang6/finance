@@ -63,7 +63,7 @@ class TestUserInput(unittest.TestCase):
     def test_get_ticker_symbol(self):
         @run_with_io
         def outside_func():
-            return UserInput.get_ticker_symbol()
+            return get_ticker_symbol()
 
         self.assertEqual("AAPL", outside_func(standard_inputs=["AAPL"])[1])
         self.assertEqual("12345", outside_func(standard_inputs=["123456", "12345", "AAPL"])[1])
@@ -71,17 +71,28 @@ class TestUserInput(unittest.TestCase):
     def test_get_buy_year(self):
         @run_with_io
         def outside_func():
-            return UserInput.get_buy_year()
+            return get_buy_year()
 
         self.assertEqual(1701, outside_func(standard_inputs=["1701"])[1])
         self.assertEqual(2023, outside_func(standard_inputs=["2023"])[1])
         self.assertEqual(1850, outside_func(standard_inputs=["1850"])[1])
         self.assertEqual(1701, outside_func(standard_inputs=["1699", "1700", "2025", "1701"])[1])
 
-    def test_get_dollar_amount(self):
+    def test_get_principal_investment(self):
         @run_with_io
         def outside_func():
-            return UserInput.get_dollar_amount()
+            return get_principal_investment()
+
+        self.assertEqual(1701, outside_func(standard_inputs=["1701"])[1])
+        self.assertEqual(2023, outside_func(standard_inputs=["2023"])[1])
+        self.assertEqual(1850, outside_func(standard_inputs=["1850"])[1])
+        self.assertEqual(1699, outside_func(standard_inputs=["1699", "1700", "2025", "1701"])[1])
+        self.assertEqual(1701, outside_func(standard_inputs=["abdfb", "@#$dg", "202df5", "1701"])[1])
+
+    def test_get_monthly_investment(self):
+        @run_with_io
+        def outside_func():
+            return get_monthly_investment()
 
         self.assertEqual(1701, outside_func(standard_inputs=["1701"])[1])
         self.assertEqual(2023, outside_func(standard_inputs=["2023"])[1])
@@ -106,10 +117,10 @@ class TestUserInput(unittest.TestCase):
 
         @run_with_io
         def outside_func():
-            return UserInput().get_user_input()
+            return get_user_input()
 
-        self.assertEqual(s, outside_func(standard_inputs=["AAPL", "1995", "100"])[1])
-        self.assertEqual(s, outside_func(standard_inputs=["AAAAAA", "AAPL", "1700", "1995", "asdfsd", "100"])[1])
+        self.assertEqual(s, outside_func(standard_inputs=["AAPL", "1995", "100", "0"])[1])
+        self.assertEqual(s, outside_func(standard_inputs=["AAAAAA", "AAPL", "1700", "1995", "asdfsd", "100", "0"])[1])
 
 
 if __name__ == "__main__":
