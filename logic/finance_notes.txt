@@ -17,3 +17,8 @@ hist = msft.history(start = "yyyy-mm-dd", end = 'yyyy-mm-dd')
 hist.iloc[[0]] # for a panda DataFrame row
 hist.iloc[0] # for a "dict" of the row
 hist.iloc[0]["Open"] # for the open price
+
+
+# first date a stock is available:
+msft.info['firstTradeDateEpochUtc']
+# times in epoch, need to convert to human time
