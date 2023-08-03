@@ -93,10 +93,13 @@ class TestUserInput(unittest.TestCase):
         s = StockSearch("AAPL", 1995, 100)
         self.assertEqual("AAPL", s.symbol)
         self.assertEqual(1995, s.year)
-        self.assertEqual(100, s.dollars)
+        self.assertEqual(100, s.principal_investment)
+        self.assertEqual(0, s.monthly_investment)
         a = StockSearch("AAPL", 1995, 100)
         self.assertEqual(s, a)
         self.assertIsNot(s, a)
+        b = StockSearch("AAPL", 1995, 100, 10)
+        self.assertEqual(10, b.monthly_investment)
 
     def test_get_user_input(self):
         s = StockSearch("AAPL", 1995, 100)

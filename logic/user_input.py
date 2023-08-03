@@ -50,23 +50,25 @@ class UserInput:
 
 class StockSearch:
     """Immutable class that represents one search."""
-    def __init__(self, symbol: str, year: int, dollars: int):
+    def __init__(self, symbol: str, year: int, principal_investment: int, monthly_investment: int = 0):
         """When instantiated, a StockSearch represents a Ticker symbol, year, and dollars amount immutably."""
 
         if (type(symbol) is not str or len(symbol) > TICKER_MAX_LENGTH
-                or type(year) is not int or type(dollars) is not int):
+                or type(year) is not int or type(principal_investment) is not int or type(monthly_investment) is not int):
             raise ValueError("make sure inputs are valid")
 
         self._symbol = symbol
         self._year = year
-        self._dollars = dollars
+        self._principal_investment = principal_investment
+        self._monthly_investment = monthly_investment
 
     def __hash__(self):
-        return hash((self._symbol, self._year, self._dollars))
+        return hash((self._symbol, self._year, self._principal_investment, self._monthly_investment))
 
     def __eq__(self, other):
         return (isinstance(other, type(self)) and
-                (self._symbol, self._year, self._dollars) == (other.symbol, other.year, other.dollars))
+                (self._symbol, self._year, self._principal_investment, self._monthly_investment) ==
+                (other.symbol, other.year, other.principal_investment, other.monthly_investment))
 
     @property
     def symbol(self) -> str:
@@ -77,8 +79,12 @@ class StockSearch:
         return self._year
 
     @property
-    def dollars(self) -> int:
-        return self._dollars
+    def principal_investment(self) -> int:
+        return self._principal_investment
+
+    @property
+    def monthly_investment(self) -> int:
+        return self._monthly_investment
 
 
 __all__ = [UserInput.__name__, StockSearch.__name__]
