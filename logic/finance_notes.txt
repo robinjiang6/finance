@@ -22,3 +22,9 @@ hist.iloc[0]["Open"] # for the open price
 # first date a stock is available:
 msft.info['firstTradeDateEpochUtc']
 # times in epoch, need to convert to human time
+
+
+a = search year < this year
+b = search month < this month
+
+while( a OR (a' AND b)
