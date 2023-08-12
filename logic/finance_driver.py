@@ -8,6 +8,9 @@
 import yfinance
 import datetime
 from logic.user_input import StockSearch
+from collections import namedtuple
+
+Investment = namedtuple("Investment", )
 
 
 class TickerError(Exception):
@@ -26,6 +29,7 @@ class CalculateReturn:
             raise TickerError(f'"{search.symbol}" is not a valid symbol.')
         self._total_investment = 0
         self._returns = None
+        self._investment_log = []
 
     def __getitem__(self, key):
         """Returns the item stored in self._info at key, or raises KeyError if key does not exist."""
@@ -47,10 +51,11 @@ class CalculateReturn:
             # returns already calculated value if in cache
             return self._returns
 
-        month, next_month, day = _format_month_and_day()
+        month, day = _format_month_and_day()
 
-        # search for one year from search.year to search.year + 1
-        history = self._get_history(self._search.year, month, day, end_year=self._search.year + 1)
+        # search from search.year to now
+        history = self._ticker.history(start=datetime.date(self._search.year, month, day),
+                                       end=datetime.date.today())
         # self._returns is initially set to just the principal investment
         # and self._total_investment is set to just the principal investment
         self._total_investment = self._search.principal_investment
@@ -86,45 +91,21 @@ class CalculateReturn:
             self._returns = round(self._returns, 2)
             return self._returns
 
-
-
-
-    def _get_history(self, year: int, month: int | str, day: int | str, end_year: int = None, end_month: int | str = None) -> 'pandas.Dataframe':
-        """Gets the history of a stock from the given date. If no end date is given, 1 month later will be chosen.
-        Month and day must be either double-digit or in 0X form"""
-
-        if end_month is None:
-            end_month = month
-        if end_year is None:
-            if int(end_month) != month and int(end_month) == 1:
-                print("BOO")
-                end_year = year + 1
-            else:
-                end_year = year
-        return self._ticker.history(start=f"{year}-{month}-{day}",
-                                    end=f"{end_year}-{end_month}-{day}")
-
     @property
     def total_investment(self) -> int:
         """Returns the total investment (principal + months)"""
         return self._total_investment
 
 
-def _format_month_and_day(month: int = None) -> tuple[str | int, str | int, str | int]:
-    """returns a tuple of month, next_month, and day in (MM, MM, DD) form"""
-    if month is None:
-        month = datetime.date.today().month
-    next_month = month + 1
-    if next_month == 13:
-        next_month = 1
+def _format_month_and_day() -> tuple[str | int, str | int]:
+    """returns a tuple of month and day in (MM, DD) form"""
+    month = datetime.date.today().month
     day = datetime.date.today().day
     if month < 10:
         month = '0' + str(month)
-    if next_month < 10:
-        next_month = '0' + str(next_month)
     if day < 10:
         day = '0' + str(day)
-    return month, next_month, day
+    return month, day
 
 
 __all__ = [TickerError.__name__, CalculateReturn.__name__]

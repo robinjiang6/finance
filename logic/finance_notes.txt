@@ -28,3 +28,7 @@ a = search year < this year
 b = search month < this month
 
 while( a OR (a' AND b)
+
+# can use <, >, =, to compare datetime.date(yy, mm, dd)
+# can add datetime.date + datetime.timedelta(1) for tommorrow
+# or subtract datetime.date - datetime.timedelta(1) for yesterday
