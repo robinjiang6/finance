@@ -15,7 +15,7 @@ from collections import namedtuple
 Investment = namedtuple("Investment", ["date", "amount"])
 
 # Global constant representing one month of time difference
-ONE_MONTH = relativedelta(months = 1)
+ONE_MONTH = relativedelta(months=1)
 
 
 class TickerError(Exception):
@@ -42,40 +42,34 @@ class CalculateReturn:
 
     def get_returns(self) -> float:
         """Uses the information in search to calculate change in capital based on yfinance."""
+        if self._returns is not None:
+            # returns already calculated value if in cache
+            return self._returns
 
         if 'currentPrice' not in self._info:
             current_price = self._info['previousClose']
         else:
             current_price = self._info['currentPrice']
 
-        return self.calculate_change(current_price)
+        return self.calculate_change(ending_price=current_price, start_date=self._search.date)
 
-    def calculate_change(self, ending_price: int | float) -> float:
+    def calculate_change(self, ending_price: int | float, start_date: datetime.date) -> float:
         """Returns the amount of money resulting after investing at starting_price."""
-        if self._returns is not None:
-            # returns already calculated value if in cache
-            return self._returns
-
-        today = datetime.date.today()
-
         # temp_investment_log will be converted to a tuple at the end of the method
         # and stored in self._investment_log
         temp_investment_log = []
 
-        # search from search.year to now
-        start_date = datetime.date(year=self._search.year, month=today.month, day=today.day)
+        # search from start_date to now
         history = self._ticker.history(start=start_date, end=datetime.date.today())
+
         # self._returns is initially set to just the principal investment
         # and self._total_investment is set to just the principal investment
         self._total_investment = self._search.principal_investment
         self._returns = self._search.principal_investment * (ending_price / history.iloc[0]["Open"])
         temp_investment_log.append(Investment(start_date, self._search.principal_investment))
 
-        if self._search.monthly_investment == 0:
-            self._returns = round(self._returns, 2)
-            self._investment_log = tuple(temp_investment_log)
-            return self._returns
-        else:
+        if self._search.monthly_investment != 0:
+            today = datetime.date.today()
             target_date = start_date
 
             # index will represent the days in the history
@@ -97,9 +91,9 @@ class CalculateReturn:
                 self._total_investment += self._search.monthly_investment
                 index += 32
 
-            self._returns = round(self._returns, 2)
-            self._investment_log = tuple(temp_investment_log)
-            return self._returns
+        self._returns = round(self._returns, 2)
+        self._investment_log = tuple(temp_investment_log)
+        return self._returns
 
     @property
     def total_investment(self) -> int:

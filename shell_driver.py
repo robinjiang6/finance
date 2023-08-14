@@ -13,7 +13,10 @@ def run() -> None:
     print(f"If you had invested ${search.principal_investment} into {search.symbol} in "
           f"{search.year} with a monthly investment of ${search.monthly_investment}, you would now have ${s.get_returns()}")
     percentage = round(((s.get_returns() - s.total_investment)/s.total_investment) * 100, 2)
-    print(f"In total, you invested ${s.total_investment}, which means your investment increased by {percentage}%")
+    delta = "increased"
+    if percentage < 0:
+        delta = "decreased"
+    print(f"In total, you invested ${s.total_investment}, which means your investment {delta} by {abs(percentage)}%")
 
     # for item in s.investment_log:
     #     print(item)

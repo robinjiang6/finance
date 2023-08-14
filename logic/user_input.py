@@ -10,7 +10,8 @@ TICKER_MAX_LENGTH = 5
 
 
 def get_user_input() -> 'StockSearch':
-    _search = StockSearch(get_ticker_symbol(), get_buy_year(),
+    today = datetime.date.today()
+    _search = StockSearch(get_ticker_symbol(), datetime.date(get_buy_year(), today.month, today.day),
                           get_principal_investment(), get_monthly_investment())
     return _search
 
@@ -55,33 +56,33 @@ def get_monthly_investment() -> int:
 
 class StockSearch:
     """Immutable class that represents one search."""
-    def __init__(self, symbol: str, year: int, principal_investment: int, monthly_investment: int = 0):
+    def __init__(self, symbol: str, date: datetime.date, principal_investment: int, monthly_investment: int = 0):
         """When instantiated, a StockSearch represents a Ticker symbol, year, and dollars amount immutably."""
 
         if (type(symbol) is not str or len(symbol) > TICKER_MAX_LENGTH
-                or type(year) is not int or type(principal_investment) is not int or type(monthly_investment) is not int):
+                or type(date) is not datetime.date or type(principal_investment) is not int or type(monthly_investment) is not int):
             raise ValueError("make sure inputs are valid")
 
         self._symbol = symbol
-        self._year = year
+        self._date = date
         self._principal_investment = principal_investment
         self._monthly_investment = monthly_investment
 
     def __hash__(self):
-        return hash((self._symbol, self._year, self._principal_investment, self._monthly_investment))
+        return hash((self._symbol, self._date, self._principal_investment, self._monthly_investment))
 
     def __eq__(self, other):
         return (isinstance(other, type(self)) and
-                (self._symbol, self._year, self._principal_investment, self._monthly_investment) ==
-                (other.symbol, other.year, other.principal_investment, other.monthly_investment))
+                (self._symbol, self._date, self._principal_investment, self._monthly_investment) ==
+                (other.symbol, other.date, other.principal_investment, other.monthly_investment))
 
     @property
     def symbol(self) -> str:
         return self._symbol
 
     @property
-    def year(self) -> int:
-        return self._year
+    def date(self) -> datetime.date:
+        return self._date
 
     @property
     def principal_investment(self) -> int:

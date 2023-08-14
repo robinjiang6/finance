@@ -8,8 +8,9 @@ import unittest
 import contextlib
 import io
 from unittest.mock import patch
+import datetime
 
-
+today = datetime.date.today()
 def run_with_io(func):
     """Decorator that runs func with contextlib.redirect_stdout and patch to simulate standard input and output.
     new function returns a tuple of length 2, with a list at index = 0 containing standard output from the program
@@ -101,19 +102,19 @@ class TestUserInput(unittest.TestCase):
         self.assertEqual(1701, outside_func(standard_inputs=["abdfb", "@#$dg", "202df5", "1701"])[1])
 
     def test_stock_search(self):
-        s = StockSearch("AAPL", 1995, 100)
+        s = StockSearch("AAPL", datetime.date(1995, today.month, today.day), 100)
         self.assertEqual("AAPL", s.symbol)
-        self.assertEqual(1995, s.year)
+        self.assertEqual(1995, s.date.year)
         self.assertEqual(100, s.principal_investment)
         self.assertEqual(0, s.monthly_investment)
-        a = StockSearch("AAPL", 1995, 100)
+        a = StockSearch("AAPL", datetime.date(1995, today.month, today.day), 100)
         self.assertEqual(s, a)
         self.assertIsNot(s, a)
-        b = StockSearch("AAPL", 1995, 100, 10)
+        b = StockSearch("AAPL", datetime.date(1995, today.month, today.day), 100, 10)
         self.assertEqual(10, b.monthly_investment)
 
     def test_get_user_input(self):
-        s = StockSearch("AAPL", 1995, 100)
+        s = StockSearch("AAPL", datetime.date(1995, today.month, today.day), 100)
 
         @run_with_io
         def outside_func():
