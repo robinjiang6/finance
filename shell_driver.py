@@ -15,6 +15,9 @@ def run() -> None:
     percentage = round(((s.get_returns() - s.total_investment)/s.total_investment) * 100, 2)
     print(f"In total, you invested ${s.total_investment}, which means your investment increased by {percentage}%")
 
+    # for item in s.investment_log:
+    #     print(item)
+
 
 if __name__ == "__main__":
     run()

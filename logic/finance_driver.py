@@ -7,10 +7,15 @@
 
 import yfinance
 import datetime
+from dateutil.relativedelta import relativedelta
 from logic.user_input import StockSearch
 from collections import namedtuple
 
-Investment = namedtuple("Investment", )
+# an Investment namedtuple represents a date and a dollar amount invested into a given stock
+Investment = namedtuple("Investment", ["date", "amount"])
+
+# Global constant representing one month of time difference
+ONE_MONTH = relativedelta(months = 1)
 
 
 class TickerError(Exception):
@@ -29,7 +34,7 @@ class CalculateReturn:
             raise TickerError(f'"{search.symbol}" is not a valid symbol.')
         self._total_investment = 0
         self._returns = None
-        self._investment_log = []
+        self._investment_log = None
 
     def __getitem__(self, key):
         """Returns the item stored in self._info at key, or raises KeyError if key does not exist."""
@@ -51,44 +56,49 @@ class CalculateReturn:
             # returns already calculated value if in cache
             return self._returns
 
-        month, day = _format_month_and_day()
+        today = datetime.date.today()
+
+        # temp_investment_log will be converted to a tuple at the end of the method
+        # and stored in self._investment_log
+        temp_investment_log = []
 
         # search from search.year to now
-        history = self._ticker.history(start=datetime.date(self._search.year, month, day),
-                                       end=datetime.date.today())
+        start_date = datetime.date(year=self._search.year, month=today.month, day=today.day)
+        history = self._ticker.history(start=start_date, end=datetime.date.today())
         # self._returns is initially set to just the principal investment
         # and self._total_investment is set to just the principal investment
         self._total_investment = self._search.principal_investment
-        self._returns = round(self._search.principal_investment * (ending_price / history.iloc[0]["Open"]), 2)
+        self._returns = self._search.principal_investment * (ending_price / history.iloc[0]["Open"])
+        temp_investment_log.append(Investment(start_date, self._search.principal_investment))
 
         if self._search.monthly_investment == 0:
             self._returns = round(self._returns, 2)
+            self._investment_log = tuple(temp_investment_log)
             return self._returns
         else:
-            year = self._search.year
-            # carry_over_investment is to be invested at the next available chance
-            # in case a stock is unavailable for a whole month
-            carry_over_investment = 0
-            while int(month) < datetime.date.today().month or year < datetime.date.today().year:
-                month_history = self._get_history(year=year, month=month, day=day, end_month=next_month)
-                if len(month_history) == 0:
-                    # empty dataframe, there is no data from this month, so rollover investment to next available month
-                    carry_over_investment += self._search.monthly_investment
-                else:
-                    # there is data for this month, so the monthly investment,
-                    # as well as the rollover investment is invested
-                    month_price = month_history.iloc[0]["Open"]
-                    self._total_investment += self._search.monthly_investment + carry_over_investment
-                    self._returns += round(((self._search.monthly_investment + carry_over_investment) *
-                                            (ending_price / month_price)), 2)
-                    carry_over_investment = 0
+            target_date = start_date
 
-                # updating the date for the next month
-                month, next_month, day = _format_month_and_day(month=int(next_month))
-                if int(month) == 1:
-                    # next year since month is January
-                    year += 1
+            # index will represent the days in the history
+            index = 32
+
+            while index < len(history) and history.iloc[index].name.date() < today:
+                # WORK ON THIS RIGHT HERE
+
+                # If a price for target_date cannot be found, the closest day after target_date will be used.
+                # This is meant to simulate real life, where you cannot buy a stock in the past,
+                # so the closest date before target_date will not be used.
+                target_date += ONE_MONTH
+                # after this loop, the selected date will be greater than or equal to target date
+                while history.iloc[index].name.date() >= target_date:
+                    index -= 1
+                index += 1
+                temp_investment_log.append(Investment(history.iloc[index].name.date(), self._search.monthly_investment))
+                self._returns += self._search.monthly_investment * (ending_price / history.iloc[index]['Open'])
+                self._total_investment += self._search.monthly_investment
+                index += 32
+
             self._returns = round(self._returns, 2)
+            self._investment_log = tuple(temp_investment_log)
             return self._returns
 
     @property
@@ -96,16 +106,10 @@ class CalculateReturn:
         """Returns the total investment (principal + months)"""
         return self._total_investment
 
-
-def _format_month_and_day() -> tuple[str | int, str | int]:
-    """returns a tuple of month and day in (MM, DD) form"""
-    month = datetime.date.today().month
-    day = datetime.date.today().day
-    if month < 10:
-        month = '0' + str(month)
-    if day < 10:
-        day = '0' + str(day)
-    return month, day
+    @property
+    def investment_log(self) -> tuple:
+        """Returns the log of investment throughout the months"""
+        return self._investment_log
 
 
 __all__ = [TickerError.__name__, CalculateReturn.__name__]
