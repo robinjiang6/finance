@@ -12,6 +12,7 @@ s['currentPrice']
 # get history price of stock
 https://github.com/ranaroussi/yfinance/wiki/Ticker
 hist = msft.history(start = "yyyy-mm-dd", end = 'yyyy-mm-dd')
+# actually just use datetime.date
 
 # get row at index i = 0
 hist.iloc[[0]] # for a panda DataFrame row
@@ -24,6 +25,7 @@ hist.iloc[0].name.date() --> datetime.date()
 # first date a stock is available:
 msft.info['firstTradeDateEpochUtc']
 # times in epoch, need to convert to human time
+datetime.fromtimestamp(epoch)
 
 # can use <, >, =, to compare datetime.date(yy, mm, dd)
 # can add datetime.date + datetime.timedelta(1) for tommorrow

@@ -7,6 +7,7 @@
 
 import yfinance
 import datetime
+from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from logic.user_input import StockSearch
 from collections import namedtuple
@@ -23,15 +24,25 @@ class TickerError(Exception):
     pass
 
 
+class DateError(Exception):
+    """Raised when a start date is before the stock starts trading"""
+    def __init__(self, date: datetime.date):
+        self._start_date = date
+
+    @property
+    def start_date(self) -> datetime.date:
+        return self._start_date
+
+
 class CalculateReturn:
     """class that calculates return on investment"""
-
     def __init__(self, search: StockSearch):
         self._search = search
         self._ticker = yfinance.Ticker(search.symbol)
         self._info = self._ticker.info
         if self._info is None:
             raise TickerError(f'"{search.symbol}" is not a valid symbol.')
+        self._verify_start_date()
         self._total_investment = 0
         self._returns = None
         self._investment_log = None
@@ -105,5 +116,11 @@ class CalculateReturn:
         """Returns the log of investment throughout the months"""
         return self._investment_log
 
+    def _verify_start_date(self) -> None:
+        """Raises a DateError if the start date is before the stock started trading"""
+        first_trade_date = datetime.fromtimestamp(self._info['firstTradeDateEpochUtc']).date()
+        if first_trade_date > self._search.date:
+            raise DateError(first_trade_date)
 
-__all__ = [TickerError.__name__, CalculateReturn.__name__]
+
+__all__ = [TickerError.__name__, DateError.__name__, CalculateReturn.__name__]
